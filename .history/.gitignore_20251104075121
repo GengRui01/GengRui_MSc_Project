@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environments
+venv/
+.env/
+
+# Models and cache
+models/*.pkl
+*.log
+
+# VSCode configs
+.vscode/
+
+# Streamlit cache
+.streamlit/
