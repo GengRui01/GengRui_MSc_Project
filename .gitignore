@@ -3,13 +3,11 @@ __pycache__/
 *.pyc
 *.pyo
 
-# Virtual environments
-venv/
-.env/
+# Mac system file
+.DS_Store
 
-# Models and cache
-models/*.pkl
-*.log
+# VSCode local history
+.history/
 
 # VSCode configs
 .vscode/
