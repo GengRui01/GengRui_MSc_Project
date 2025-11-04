@@ -1,7 +1,3 @@
-# app.py — Enhanced Streamlit Dashboard
-# Author: Geng Rui
-# Purpose: Display predictive analytics for student learning performance
-
 import streamlit as st
 import pandas as pd
 import joblib
@@ -117,7 +113,7 @@ fig = px.scatter(
     x="time_spent",
     y="completion_rate",
     color="risk_level",
-    trendline="ols",  # 自动线性拟合
+    trendline="ols",  # Automatic linear fitting
     color_discrete_map={"High Risk": "#E74C3C", "Low Risk": "#27AE60"},
     labels={
         "time_spent": "Time Spent (hours)",
@@ -131,7 +127,7 @@ st.plotly_chart(fig, use_container_width=True)
 # Risk and Engagement Overview (Side-by-Side)
 col1, col2 = st.columns(2)
 
-# 左侧：Bar chart: distribution of risk levels
+# Left side：Bar chart: distribution of risk levels
 with col1:
     st.write("#### 🍩 Risk Level Distribution")
     fig = px.pie(
@@ -149,14 +145,14 @@ with col1:
     )
     st.plotly_chart(fig, use_container_width=True)
 
-# 右侧：Bar chart: average engagement comparison by risk level
+# Right side：Bar chart: average engagement comparison by risk level
 with col2:
     st.write("#### 📊 Engagement Pattern Comparison")
-    # 计算各风险等级的平均值
+    # Calculate the average value for each risk level
     avg_by_risk = df.groupby("risk_level")[["login_count", "time_spent", "quiz_attempts", "completion_rate"]].mean().reset_index()
-    # 转换为长格式便于绘图
+    # Convert to long format for easier plotting
     avg_melted = avg_by_risk.melt(id_vars="risk_level", var_name="Metric", value_name="Average Value")
-    # 绘制分组柱状图
+    # Plot the grouped bar chart
     fig_bar = px.bar(
         avg_melted,
         x="Metric",
@@ -166,7 +162,7 @@ with col2:
         color_discrete_map={"High Risk": "#E74C3C", "Low Risk": "#27AE60"},
         text_auto=".2f"
     )
-    # 美化布局
+    # Improve the layout
     fig_bar.update_layout(
         xaxis_title="Metric",
         yaxis_title="Avg Value",

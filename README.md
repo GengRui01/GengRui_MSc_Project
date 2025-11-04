@@ -1,7 +1,62 @@
 # 🎓 Student Behavior Analysis and Prediction Dashboard
 
-This project implements a machine learning-based dashboard for analysing and predicting student learning risks on online platforms.  
-It was developed as part of the MSc Project — *Student Behavior Analysis and Prediction on Online Learning Platforms Based on Machine Learning*.
+This project provides a persisted ML model + StandardScaler saved via joblib and a Streamlit dashboard backed by MySQL (with synthetic auto-seeding on first run) . 
+
+It uses cached data/model loading for responsiveness and reproducibility (fixed random seed), and renders interactive charts with Plotly. 
+
+The app supports dataset-level risk screening and Single Student Prediction, and includes a built-in model evaluation workflow covering data realism, predictive performance, and visual interpretability.
+
+---
+
+## ✨ Features
+
+### 1. Backend Capabilities (Data / Model / Automation & Reproducibility)
+
+Data layer: connects to MySQL; when the target table is empty (e.g. the first query) it auto-seeds synthetic data (fixed random seed for reproducibility).
+
+Model layer: a scikit-learn–based model developed and trained in this project, then persisted via joblib for deployment. After evaluating Logistic Regression (baseline) and Gradient Boosting, Random Forest was chosen as the production classifier. The task is binary risk prediction (High/Low), and evaluation uses the same setting.
+
+### 2. Controls Panel
+
+One-click **Refresh Data**: clears `st.cache_data`, reloads the dataset, and triggers `st.rerun()` to update all views.
+
+Caching: data uses `@st.cache_data(ttl=600)` (10-min expiry).
+
+Status: shows a success toast and a “Last refreshed” timestamp in the sidebar.
+
+Safety: no schema changes; Model/scaler use `@st.cache_resource` and are not affected.
+
+### 3. Student Risk Prediction (dataset level)
+
+Predicted High-Risk Students: table of high-risk learners based on current data (`login_count`, `time_spent`, `quiz_attempts`, `completion_rate`).
+
+Interactive Filters: select by `student_id` to view that student’s detailed engagement record.
+
+### 4. Multi-dimensional Visualization (engagement & risk overview)
+
+Time Spent vs Completion Rate: scatter with OLS trendline, colored by `risk_level`.
+
+Risk Level Distribution: donut chart (High / Low).
+
+Engagement Pattern Comparison: grouped bars comparing mean `login_count`, `time_spent`, `quiz_attempts`, `completion_rate` by `risk_level`.
+
+### 5. Single Student Prediction (one-sample inference)
+
+Input: `login_count`, `time_spent`, `quiz_attempts` (name/ID are for display only).
+
+Click **Predict** to run inference for a single student record.
+
+Outputs a risk category (High / Medium / Low) and probability with a short rule-based recommendation; expandable panel shows the input features (JSON).
+
+### 🧠 Model Evaluation Results (RQ1–RQ3)
+
+Click **Evaluate Model** to run the evaluation workflow covering RQ1–RQ3.
+
+RQ1 – Data Realism: descriptive statistics and correlation heatmap of synthetic data.
+
+RQ2 – Predictive Performance: accuracy/precision/recall/F1 table, confusion matrix, and classification report.
+
+RQ3 – Visualization & Interpretability: integrates data realism and performance results in the dashboard to support explainability and evidence-based intervention.
 
 ---
 
@@ -10,71 +65,83 @@ It was developed as part of the MSc Project — *Student Behavior Analysis and P
 ```
 GengRui_MSc_Project/
 │
-├── app.py                     # Streamlit main dashboard
+├─ db/
+│  └─ init.sql                  # Creates the MySQL schema and tables used by this project.
 │
-├── db/
-│   └── init.sql               # MySQL database initialization script
+├─ models/
+│  ├─ scaler.pkl                # A fitted StandardScaler that normalises features exactly as in training.
+│  └─ trained_model.pkl         # The trained machine-learning model used by the dashboard.
 │
-├── models/
-│   ├── trained_model.pkl      # Trained ML model
-│   └── scaler.pkl             # StandardScaler object
+├─ utils/
+│  ├─ data_generator.py         # Generates synthetic student-behaviour data and writes it into the database.
+│  ├─ db_connector.py           # Creates an SQL connection and fetches student records, auto-seeding the table if it’s empty.
+│  └─ model_trainer.py          # Holds the logic for model training, evaluation, and single-record inference.
 │
-├── utils/
-│   ├── data_generator.py      # Generate or load student behavior data
-│   ├── db_connector.py        # Connect to MySQL database
-│   └── model_trainer.py       # Model training and evaluation logic
-│
-├── requirements.txt           # Python dependencies
-└── README.md                  # Project documentation
-```
-
----
-
-## 🧩 Environment Setup
-
-To set up the environment, install all required Python packages with a single command:  
-
-```bash
-pip install streamlit pandas numpy scikit-learn sqlalchemy pymysql plotly
-```
-
-After successful installation, you can verify the environment with the following commands:  
-
-```bash
-streamlit --version
-python -m sklearn --help
+├─ .gitignore                   # Ignore rules for caches, editor files, and other local artefacts.
+├─ app.py                       # The Streamlit dashboard that brings prediction, visualisation, and evaluation together.
+└─ README.md                    # Project documentation.
 ```
 
 ---
 
 ## 🚀 How to Run
 
-### 1. Initialize Database
+### 1. Environment Setup
+
+To set up the environment, install all required Python packages with a single command:  
+
+```bash
+pip install streamlit pandas numpy scikit-learn sqlalchemy pymysql plotly joblib
+```
+
+### 2. Initialize Database
+
 Run the SQL script once to create the database and tables:
+
 ```bash
 mysql -u root -p < db/init.sql
 ```
 
-### 2. Launch Dashboard
+> *Note:*  
+>`init.sql` only creates the database and tables.  
+>On the first query, if the table is empty, the app will auto-seed synthetic data via `utils/data_generator.py`.
+
+### 3. Configure connection (Once)
+
+Open `utils/db_connector.py` and set MySQL username and password in SQLAlchemy URL, e.g.
+
+```python
+engine = create_engine("mysql+pymysql://<USER>:<PASSWORD>@localhost:3306/gengrui_msc")
+```
+
+### 4. Train Model (Optional)
+
+The pre-trained model (`trained_model.pkl`) and scaler (`scaler.pkl`) are already included under the `models/` directory.
+
+If you wish to retrain the model, you can manually run:
+
+```bash
+python utils/model_trainer.py
+```
+
+This will update the model files under the `models/` directory.
+
+### 5. Launch Dashboard
+
 Start the Streamlit application:
+
 ```bash
 streamlit run app.py
 ```
 
 Then open your browser at [http://localhost:8501](http://localhost:8501).
 
-> 💡 Note:
-> - The system will automatically connect to the database and load the pre-trained model.
-> - The pre-trained model (`trained_model.pkl`) and scaler (`scaler.pkl`) are included to ensure result reproducibility.
-> - If you wish to retrain the model, you can manually run:
->   ```bash
->   python utils/model_trainer.py
->   ```
->   This will update the model files under the `models/` directory.
-
 ---
 
-## 📚 Author
+## 🧑‍🎓 Author
+
 **Geng Rui (耿锐)**  
+
 MSc Project – *Student Behavior Analysis and Prediction on Online Learning Platforms Based on Machine Learning*  
-Supervisor: *(fill in your supervisor name)*  
+
+Supervisor: *SURYANTO*

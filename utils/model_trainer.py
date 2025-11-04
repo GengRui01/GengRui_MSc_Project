@@ -175,9 +175,7 @@ def infer_one(feature_dict: dict):
         "risk_probability": round(float(prob), 4),
     }
 
-# ============================================
-# Model Evaluation (Reuses training pipeline)
-# ============================================
+
 def evaluate_model():
     """
     Unified evaluation covering RQ1–RQ3:
@@ -213,12 +211,7 @@ def evaluate_model():
 
     # Model evaluation
     y_pred = model.predict(X_test)
-    if hasattr(model, "predict_proba"):
-        y_score = model.predict_proba(X_test)[:, 1]   # 正类(High Risk)概率
-    elif hasattr(model, "decision_function"):
-        y_score = model.decision_function(X_test)     # 部分模型没有 proba
-    else:
-        y_score = None
+    y_score = model.predict_proba(X_test)[:, 1]
     metrics = {
         "Accuracy": accuracy_score(y_test, y_pred),
         "Precision": precision_score(y_test, y_pred, zero_division=0),
