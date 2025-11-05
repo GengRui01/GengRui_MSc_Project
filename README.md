@@ -48,15 +48,16 @@ Click **Predict** to run inference for a single student record.
 
 Outputs a risk category (High / Medium / Low) and probability with a short rule-based recommendation; expandable panel shows the input features (JSON).
 
-### 🧠 Model Evaluation Results (RQ1–RQ3)
+### 6. Model Evaluation Results (Positive class = High-risk)
 
 Click **Evaluate Model** to run the evaluation workflow covering RQ1–RQ3.
 
-RQ1 – Data Realism: descriptive statistics and correlation heatmap of synthetic data.
+RQ1 — Data realism: Outputs `describe` and `corr`; check distributions, feature correlations, and class balance.
 
-RQ2 – Predictive Performance: accuracy/precision/recall/F1 table, confusion matrix, and classification report.
+RQ2 — Predictive performance: Outputs Metrics (Acc/Prec/Rec/F1/AUC), Confusion Matrix, and Classification Report.  
+Positive class = High-risk (class 0); threshold = 0.5. Focus on FN (missed high-risk).
 
-RQ3 – Visualization & Interpretability: integrates data realism and performance results in the dashboard to support explainability and evidence-based intervention.
+RQ3 — Interpretability: A SHAP summary was already stored as `models/shap_force_summary.html` when `train_model`, shown it under Visualization and Interpretability. Positive SHAP pushes toward High-risk; negative toward Low-risk.
 
 ---
 
@@ -70,6 +71,7 @@ GengRui_MSc_Project/
 │
 ├─ models/
 │  ├─ scaler.pkl                # A fitted StandardScaler that normalises features exactly as in training.
+│  ├─ shap_force_summary.html   # SHAP summary saved during evaluation and displayed in Visualization and Interpretability.
 │  └─ trained_model.pkl         # The trained machine-learning model used by the dashboard.
 │
 ├─ utils/
@@ -91,7 +93,7 @@ GengRui_MSc_Project/
 To set up the environment, install all required Python packages with a single command:  
 
 ```bash
-pip install streamlit pandas numpy scikit-learn sqlalchemy pymysql plotly joblib
+pip install streamlit pandas numpy scikit-learn sqlalchemy pymysql plotly joblib shap
 ```
 
 ### 2. Initialize Database
@@ -116,7 +118,7 @@ engine = create_engine("mysql+pymysql://<USER>:<PASSWORD>@localhost:3306/gengrui
 
 ### 4. Train Model (Optional)
 
-The pre-trained model (`trained_model.pkl`) and scaler (`scaler.pkl`) are already included under the `models/` directory.
+The pre-trained model (`trained_model.pkl`) and scaler (`scaler.pkl`) and shap (`shap_force_summary.html`) are already included under the `models/` directory.
 
 If you wish to retrain the model, you can manually run:
 

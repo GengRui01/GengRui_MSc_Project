@@ -21,7 +21,7 @@ def prepare_data(df):
     # Define input features
     X = df[["login_count", "time_spent", "quiz_attempts"]]
 
-    # Initial threshold
+    # Initial thresholdshap.Explainer
     threshold = 0.7
     y = (df["completion_rate"] >= threshold).astype(int)
 
@@ -83,10 +83,16 @@ def explain_model(model, X_train, X_test):
     print("[INFO] Generating SHAP explainability plot...")
     explainer = shap.Explainer(model, X_train)
     shap_values = explainer(X_test)
-    shap.summary_plot(shap_values, X_test, show=False)
-    plt.title("Feature Importance via SHAP Values")
-    plt.tight_layout()
-    plt.show()
+    # Select SHAP values for class 0 = High-risk (if 3D, take the 0th class)
+    if shap_values.values.ndim == 3:
+        sv = shap_values.values[:, :, 0]
+        base = shap_values.base_values[:, 0]
+    else:
+        sv = shap_values.values
+        base = shap_values.base_values
+    n = min(200, len(base))  # Use a small sample for a lighter HTML file
+    force = shap.force_plot(base[:n], sv[:n], X_test[:n], matplotlib=False)
+    shap.save_html("models/shap_force_summary.html", force)
     print("[INFO] SHAP explanation completed.")
 
 
@@ -164,7 +170,7 @@ def infer_one(feature_dict: dict):
     print(f"[DEBUG] Scaled feature vector: {X_scaled}")
 
     # ----- Step 4: predict probability & label -----
-    prob = model.predict_proba(X_scaled)[0][1]  # probability of HIGH risk
+    prob = model.predict_proba(X_scaled)[0][0]  # probability of HIGH risk
     print(f"[DEBUG] Raw model probability (High Risk): {prob:.4f}")
     label = "High Risk" if prob >= 0.66 else "Medium Risk" if prob >= 0.33 else "Low Risk"
 
@@ -208,22 +214,26 @@ def evaluate_model():
     X_train, X_test, y_train, y_test = train_test_split(
         X_scaled, y, test_size=0.2, random_state=42, stratify=y
     )
-
-    # Model evaluation
     y_pred = model.predict(X_test)
-    y_score = model.predict_proba(X_test)[:, 1]
+
+    # Model evaluation    change 1 = High-risk
+    y_test_pos = (y_test == 0).astype(int)
+    y_pred_pos = (y_pred == 0).astype(int)
+    y_score = model.predict_proba(X_test)[:, 0]
     metrics = {
-        "Accuracy": accuracy_score(y_test, y_pred),
-        "Precision": precision_score(y_test, y_pred, zero_division=0),
-        "Recall": recall_score(y_test, y_pred, zero_division=0),
-        "F1": f1_score(y_test, y_pred, zero_division=0),
-        "AUC": roc_auc_score(y_test, y_score),
+        "Accuracy": accuracy_score(y_test_pos, y_pred_pos),
+        "Precision": precision_score(y_test_pos, y_pred_pos, zero_division=0),
+        "Recall": recall_score(y_test_pos, y_pred_pos, zero_division=0),
+        "F1": f1_score(y_test_pos, y_pred_pos, zero_division=0),
+        "AUC": roc_auc_score(y_test_pos, y_score),
     }
     print("[INFO] Model performance evaluated successfully.")
 
     # Classification report and confusion matrix
-    report = classification_report(y_test, y_pred)
-    cm = confusion_matrix(y_test, y_pred)
+    report = classification_report(
+        y_test_pos, y_pred_pos, target_names=["Low-risk(0)", "High-risk(1)"]
+    )
+    cm = confusion_matrix(y_test_pos, y_pred_pos)
     print("[INFO] Generated classification report and confusion matrix.")
     print(report)
 
@@ -235,4 +245,5 @@ def evaluate_model():
         "metrics": metrics,             # RQ2: key scores
         "report": report,               # RQ2: text report
         "confusion_matrix": cm,         # RQ2: visualization
+        # RQ3: models/shap_force_summary.html
     }

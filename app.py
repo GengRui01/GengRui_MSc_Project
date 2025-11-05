@@ -266,7 +266,7 @@ if st.button("Evaluate Model"):
         st.plotly_chart(fig_corr, use_container_width=True)
 
         # ---- RQ2: Predictive performance ----
-        st.write("#### ⚖️ Predictive Performance")
+        st.write("#### ⚖️ Predictive Performance (Positive class = High-risk)")
         st.write("Model Metrics:")
         st.dataframe(pd.DataFrame([results["metrics"]]), use_container_width=True)
 
@@ -281,6 +281,8 @@ if st.button("Evaluate Model"):
 
         # ---- RQ3: Visualization & Interpretability ----
         st.write("#### 🧾 Visualization and Interpretability")
+        st.write("SHAP Summary:")
+        st.components.v1.html(open("models/shap_force_summary.html").read(), height=420, scrolling=True)
         st.markdown("""
         - The dashboard provides an **interactive evaluation workflow**, integrating data realism and performance results.  
         - Educators can visually verify model effectiveness and inspect synthetic data distributions.  
