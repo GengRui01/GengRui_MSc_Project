@@ -281,10 +281,10 @@ if st.button("Evaluate Model"):
 
         # ---- RQ3: Visualization & Interpretability ----
         st.write("#### 🧾 Visualization and Interpretability")
-        st.write("SHAP Summary:")
-        st.components.v1.html(open("models/shap_force_summary.html").read(), height=420, scrolling=True)
+        st.write("SHAP Beeswarm:")
+        st.image("models/shap_explain.png", use_column_width=True)
         st.markdown("""
-        - The dashboard provides an **interactive evaluation workflow**, integrating data realism and performance results.  
+        - The dashboard provides an **integrated evaluation workflow**, integrating data realism and performance results.   
         - Educators can visually verify model effectiveness and inspect synthetic data distributions.  
         - Such transparency supports explainability and evidence-based intervention decisions.
         """)

@@ -78,21 +78,24 @@ def train_and_evaluate(models, X_train, X_test, y_train, y_test):
 
 def explain_model(model, X_train, X_test):
     """
-    Generate SHAP explainability visualization for the trained model.
+    Generate a global SHAP beeswarm and save it as PNG.
     """
     print("[INFO] Generating SHAP explainability plot...")
     explainer = shap.Explainer(model, X_train)
     shap_values = explainer(X_test)
-    # Select SHAP values for class 0 = High-risk (if 3D, take the 0th class)
-    if shap_values.values.ndim == 3:
-        sv = shap_values.values[:, :, 0]
-        base = shap_values.base_values[:, 0]
-    else:
-        sv = shap_values.values
-        base = shap_values.base_values
-    n = min(200, len(base))  # Use a small sample for a lighter HTML file
-    force = shap.force_plot(base[:n], sv[:n], X_test[:n], matplotlib=False)
-    shap.save_html("models/shap_force_summary.html", force)
+    # Select SHAP values for class 0 (High Risk) if multi-output
+    values = shap_values.values[:, :, 0] if shap_values.values.ndim == 3 else shap_values.values
+
+    # Ensure feature names exist for display
+    fallback = ["login_count", "time_spent", "quiz_attempts"][:values.shape[1]]
+    X_disp = pd.DataFrame(X_test, columns=fallback)
+
+    # Render beeswarm and save
+    shap.summary_plot(values, X_disp, show=False)
+    plt.title("Feature Importance via SHAP Values")
+    plt.tight_layout()
+    plt.savefig("models/shap_explain.png", dpi=150, bbox_inches="tight")
+    plt.close()
     print("[INFO] SHAP explanation completed.")
 
 
