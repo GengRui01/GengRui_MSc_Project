@@ -217,36 +217,36 @@ def evaluate_model():
     X_train, X_test, y_train, y_test = train_test_split(
         X_scaled, y, test_size=0.2, random_state=42, stratify=y
     )
-    y_pred = model.predict(X_test)
+    y_true = (y_test == 0).astype(int)                 # High Risk=1
+    y_pred = (model.predict(X_test) == 0).astype(int)  # High Risk=1
 
     # Model evaluation    change 1 = High-risk
-    y_test_pos = (y_test == 0).astype(int)
-    y_pred_pos = (y_pred == 0).astype(int)
-    y_score = model.predict_proba(X_test)[:, 0]
+    pos_col = int(np.where(model.classes_ == 0)[0][0])  # High Risk 的列
+    y_score = model.predict_proba(X_test)[:, pos_col]
     metrics = {
-        "Accuracy": accuracy_score(y_test_pos, y_pred_pos),
-        "Precision": precision_score(y_test_pos, y_pred_pos, zero_division=0),
-        "Recall": recall_score(y_test_pos, y_pred_pos, zero_division=0),
-        "F1": f1_score(y_test_pos, y_pred_pos, zero_division=0),
-        "AUC": roc_auc_score(y_test_pos, y_score),
+        "Accuracy": accuracy_score(y_true, y_pred),
+        "Precision": precision_score(y_true, y_pred, zero_division=0),
+        "Recall": recall_score(y_true, y_pred, zero_division=0),
+        "F1": f1_score(y_true, y_pred, zero_division=0),
+        "AUC": roc_auc_score(y_true, y_score),
     }
     print("[INFO] Model performance evaluated successfully.")
 
     # Classification report and confusion matrix
     report = classification_report(
-        y_test_pos, y_pred_pos, target_names=["Low-risk(0)", "High-risk(1)"]
+        y_true, y_pred, target_names=["Low-risk(0)", "High-risk(1)"]
     )
-    cm = confusion_matrix(y_test_pos, y_pred_pos)
+    cm = confusion_matrix(y_true, y_pred)
     print("[INFO] Generated classification report and confusion matrix.")
     print(report)
 
     # Output for dashboard (RQ3 handled in Streamlit)
-    print("[SUMMARY] Evaluation completed. Metrics ready for visualization.")
+    print("[SUMMARY] Evaluation completed. Metrics ready for visualisation.")
     return {
         "desc": desc,                   # RQ1: statistics
         "corr": corr,                   # RQ1: correlation
         "metrics": metrics,             # RQ2: key scores
         "report": report,               # RQ2: text report
-        "confusion_matrix": cm,         # RQ2: visualization
+        "confusion_matrix": cm,         # RQ2: visualisation
         # RQ3: models/shap_force_summary.html
     }

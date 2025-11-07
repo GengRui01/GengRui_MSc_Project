@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import joblib
 import plotly.express as px
-import plotly.graph_objects as go
 
 from datetime import datetime
 from utils.db_connector import fetch_student_data
@@ -13,7 +12,7 @@ from utils.model_trainer import evaluate_model, infer_one
 # Streamlit page configuration
 # -------------------------------
 st.set_page_config(
-    page_title="Student Behavior Dashboard",
+    page_title="Student Behaviour Dashboard",
     page_icon="🎓",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -54,7 +53,7 @@ def load_data():
 # Sidebar: Controls Panel
 # -------------------------------
 st.sidebar.header("🔍 Controls Panel")
-st.sidebar.write("Use this panel to refresh and manage the student behavior dataset.")
+st.sidebar.write("Use this panel to refresh and manage the student behaviour dataset.")
 
 refresh = st.sidebar.button("🔄 Refresh Data")
 
@@ -70,8 +69,8 @@ else:
 # -------------------------------
 # Model Prediction Section
 # -------------------------------
-st.title("🎓 Student Behavior Analysis and Prediction Dashboard")
-st.markdown("This dashboard displays the results of machine-learning analysis of student behavior on online learning platforms, including engagement and performance predictions, and highlights at-risk learners to support data-driven teaching.")
+st.title("🎓 Student Behaviour Analysis and Prediction Dashboard")
+st.markdown("This dashboard displays the results of machine-learning analysis of student behaviour on online learning platforms, including engagement and performance predictions, and highlights at-risk learners to support data-driven teaching.")
 
 st.markdown("---")
 
@@ -101,9 +100,9 @@ st.dataframe(filtered_df, use_container_width=True)
 st.markdown("---")
 
 # -------------------------------
-# Visualization Section
+# Visualisation Section
 # -------------------------------
-st.subheader("🎨 Multi-dimensional Visualization")
+st.subheader("🎨 Multi-dimensional Visualisation")
 
 # Line chart: time spent vs completion rate
 st.write("#### 🔵 Time Spent vs Completion Rate")
@@ -279,8 +278,8 @@ if st.button("Evaluate Model"):
         st.write("Classification Report Summary:")
         st.write({"Report": results["report"]})
 
-        # ---- RQ3: Visualization & Interpretability ----
-        st.write("#### 🧾 Visualization and Interpretability")
+        # ---- RQ3: Visualisation & Interpretability ----
+        st.write("#### 🧾 Visualisation and Interpretability")
         st.write("SHAP Beeswarm:")
         st.image("models/shap_explain.png", use_column_width=True)
         st.markdown("""
@@ -295,4 +294,4 @@ if st.button("Evaluate Model"):
 # Footer
 # -------------------------------
 st.markdown("---")
-st.caption("© 2025 Geng Rui — MSc Project | Student Behavior Analysis and Prediction on Online Learning Platforms Based on Machine Learning")
+st.caption("© 2025 Geng Rui — MSc Project | Student Behaviour Analysis and Prediction on Online Learning Platforms Based on Machine Learning")

@@ -1,4 +1,4 @@
-# 🎓 Student Behavior Analysis and Prediction Dashboard
+# 🎓 Student Behaviour Analysis and Prediction Dashboard
 
 This project provides a persisted ML model + StandardScaler saved via joblib and a Streamlit dashboard backed by MySQL (with synthetic auto-seeding on first run) . 
 
@@ -32,7 +32,7 @@ Predicted High-Risk Students: table of high-risk learners based on current data 
 
 Interactive Filters: select by `student_id` to view that student’s detailed engagement record.
 
-### 4. Multi-dimensional Visualization (engagement & risk overview)
+### 4. Multi-dimensional Visualisation (engagement & risk overview)
 
 Time Spent vs Completion Rate: scatter with OLS trendline, colored by `risk_level`.
 
@@ -57,7 +57,7 @@ RQ1 — Data realism: Outputs `describe` and `corr`; check distributions, featur
 RQ2 — Predictive performance: Outputs Metrics (Acc/Prec/Rec/F1/AUC), Confusion Matrix, and Classification Report.  
 Positive class = High-risk (class 0); threshold = 0.5. Focus on FN (missed high-risk).
 
-RQ3 — Interpretability: A SHAP beeswarm plot was already stored as `models/shap_explain.png` when `train_model`, shown it under Visualization and Interpretability. Positive SHAP pushes toward High-risk; negative toward Low-risk.
+RQ3 — Interpretability: A SHAP beeswarm plot was already stored as `models/shap_explain.png` when `train_model`, shown it under Visualisation and Interpretability. Positive SHAP pushes toward High-risk; negative toward Low-risk.
 
 ---
 
@@ -71,7 +71,7 @@ GengRui_MSc_Project/
 │
 ├─ models/
 │  ├─ scaler.pkl                # A fitted StandardScaler that normalises features exactly as in training.
-│  ├─ shap_explain.png          # SHAP beeswarm image saved during evaluation and displayed in Visualization and Interpretability.
+│  ├─ shap_explain.png          # SHAP beeswarm image saved during evaluation and displayed in Visualisation and Interpretability.
 │  └─ trained_model.pkl         # The trained machine-learning model used by the dashboard.
 │
 ├─ utils/
@@ -144,6 +144,6 @@ Then open your browser at [http://localhost:8501](http://localhost:8501).
 
 **Geng Rui (耿锐)**  
 
-MSc Project – *Student Behavior Analysis and Prediction on Online Learning Platforms Based on Machine Learning*  
+MSc Project – *Student Behaviour Analysis and Prediction on Online Learning Platforms Based on Machine Learning*  
 
 Supervisor: *SURYANTO*
