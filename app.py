@@ -210,15 +210,7 @@ if predict_btn:
         # Run inference
         result = infer_one(features)
         prob = float(result.get("risk_probability", 0.0))
-
-        # 3-tier mapping
-        if prob >= 0.75:
-            risk_level = "High Risk"
-        elif prob >= 0.50:
-            risk_level = "Medium Risk"
-        else:
-            risk_level = "Low Risk"
-
+        risk_level = result.get("risk_category", "Unknown");
         prob_pct = f"{prob*100:.2f}%"
 
         # Simple rule-based recommendation
