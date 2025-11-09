@@ -180,61 +180,53 @@ with col2:
 st.markdown("---")
 st.subheader("🧑‍🎓 Single Student Prediction")
 
-# Identity (display only, not used in model input)
-c0, c1 = st.columns([1, 1])
-with c0:
-    student_name = st.text_input("Student Name", value="")
-with c1:
-    student_id = st.text_input("Student ID", value="")
+with st.form("single_predict_form", clear_on_submit=False):
+    # Identity (display only, not used in model input)
+    c0, c1 = st.columns([1, 1])
+    with c0: student_name = st.text_input("Student Name", value="")
+    with c1: student_id = st.text_input("Student ID", value="")
+    # Core features (must match original training features)
+    c2, c3, c4 = st.columns([1, 1, 1])
+    with c2: login_count = st.number_input("Login Count", min_value=0, step=1, value=5)
+    with c3: time_spent = st.number_input("Study Time (hours)", min_value=0.0, step=0.5, value=3.0, format="%.2f")
+    with c4: quiz_attempts = st.number_input("Quiz Attempts", min_value=0, step=1, value=2)
 
-# Core features (must match original training features)
-c2, c3, c4 = st.columns([1, 1, 1])
-with c2:
-    login_count = st.number_input("Login Count", min_value=0, step=1, value=5)
-with c3:
-    time_spent = st.number_input("Study Time (hours)", min_value=0.0, step=0.5, value=3.0, format="%.2f")
-with c4:
-    quiz_attempts = st.number_input("Quiz Attempts", min_value=0, step=1, value=2)
+    if st.form_submit_button("Predict"):
+        try:
+            # Assemble features in the correct order
+            features = {
+                "login_count": int(login_count),
+                "time_spent": float(time_spent),
+                "quiz_attempts": int(quiz_attempts),
+            }
 
-predict_btn = st.button("Predict")
+            # Run inference
+            result = infer_one(features)
+            prob = float(result.get("risk_probability", 0.0))
+            risk_level = result.get("risk_category", "Unknown");
+            prob_pct = f"{prob*100:.2f}%"
 
-if predict_btn:
-    try:
-        # Assemble features in the correct order
-        features = {
-            "login_count": int(login_count),
-            "time_spent": float(time_spent),
-            "quiz_attempts": int(quiz_attempts),
-        }
+            # Simple rule-based recommendation
+            if risk_level == "High Risk":
+                recommendation = "This student's learning progress should be closely monitored, paying attention to assignment completion rate and interaction frequency."
+                card_renderer = st.error
+            elif risk_level == "Medium Risk":
+                recommendation = "This student's learning performance is relatively stable; it is recommended to appropriately increase learning engagement and the frequency of quizzes."
+                card_renderer = st.warning
+            else:
+                recommendation = "This student's learning situation is good; please maintain the current learning pace."
+                card_renderer = st.success
 
-        # Run inference
-        result = infer_one(features)
-        prob = float(result.get("risk_probability", 0.0))
-        risk_level = result.get("risk_category", "Unknown");
-        prob_pct = f"{prob*100:.2f}%"
+            # Render card
+            st.write("##### Result")
+            if student_name or student_id:
+                st.write(f"**Student:** {student_name or '—'}  |  **ID:** {student_id or '—'}")
+            card_renderer(f"**{risk_level}**  •  Probability: **{prob_pct}**  \n📝 {recommendation}")
 
-        # Simple rule-based recommendation
-        if risk_level == "High Risk":
-            recommendation = "This student's learning progress should be closely monitored, paying attention to assignment completion rate and interaction frequency."
-            card_renderer = st.error
-        elif risk_level == "Medium Risk":
-            recommendation = "This student's learning performance is relatively stable; it is recommended to appropriately increase learning engagement and the frequency of quizzes."
-            card_renderer = st.warning
-        else:
-            recommendation = "This student's learning situation is good; please maintain the current learning pace."
-            card_renderer = st.success
-
-        # Render card
-        st.write("##### Result")
-        if student_name or student_id:
-            st.write(f"**Student:** {student_name or '—'}  |  **ID:** {student_id or '—'}")
-        card_renderer(f"**{risk_level}**  •  Probability: **{prob_pct}**  \n📝 {recommendation}")
-
-        with st.expander("View input features"):
-            st.json(features)
-
-    except Exception as e:
-        st.error(f"Prediction failed: {e}")
+            with st.expander("View input features"):
+                st.json(features)
+        except Exception as e:
+            st.error(f"Prediction failed: {e}")
 
 # -------------------------------
 # Model Evaluation Section
